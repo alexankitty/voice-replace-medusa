@@ -7,6 +7,6 @@ A Medusa (plugin/extension) for the discord bot Nadeko. Connects with a separate
     Replaces the vocals of a youtube video via an RVC AI
 .voices:
     Grabs a list of available voices from the endpoint
-.setserver:
+.voicereplacerapi:
     (Bot Owner) Sets the location of the API server. Format: http://127.0.0.1:8081
 ```

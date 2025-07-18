@@ -5,6 +5,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System.Net.Http.Json;
 using Discord;
+using System.Text.RegularExpressions;
 
 namespace VoiceReplaceMedusa;
 
@@ -78,7 +79,17 @@ public sealed class VoiceReplace : Snek
         {
             var responseContent = await httpResponse.Content.ReadAsStreamAsync();
             var ext = MimeTypes.GetMimeTypeExtensions(httpResponse.Content.Headers.ContentType.ToString()).First();
-            await ctx.Channel.SendFileAsync(responseContent, $"{char.ToUpper(voice[0]) + voice.Substring(1)} {title}.{ext}");
+            var filename = CleanFileName($"{char.ToUpper(voice[0]) + voice.Substring(1)} {title}.{ext}");
+            try
+            {
+                await ctx.Channel.SendFileAsync(responseContent, filename);
+            }
+            catch
+            {
+                await ctx.SendErrorAsync($"Failed to upload result. File is most likely to large.");
+                typing.Dispose();
+                return;
+            }
         }
         else
         {
@@ -100,6 +111,11 @@ public sealed class VoiceReplace : Snek
         File.WriteAllText(Path.Combine(_basePath, _configYml), _serializer.Serialize(_config));
         await ctx.ConfirmAsync();
     }
+
+    public static string CleanFileName(string fileName)
+	{
+        return Regex.Replace(fileName, "<|>|:|\"|\\/|\\|||\\?\\*", "");
+	}
 }
 
 public class MedusaConfig

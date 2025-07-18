@@ -22,6 +22,7 @@ public sealed class VoiceReplace : Snek
         try
         {
             _httpClient = new HttpClient();
+            _httpClient.Timeout = TimeSpan.FromSeconds(300);
             _deserializer = new DeserializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
@@ -77,11 +78,11 @@ public sealed class VoiceReplace : Snek
         httpResponse = await _httpClient.PostAsJsonAsync($"{_config.Api}/replace_yt", new ReplaceYtRequest(url, voice, pitch));
         if (httpResponse.IsSuccessStatusCode)
         {
-            var responseContent = await httpResponse.Content.ReadAsStreamAsync();
-            var ext = MimeTypes.GetMimeTypeExtensions(httpResponse.Content.Headers.ContentType.ToString()).First();
-            var filename = CleanFileName($"{char.ToUpper(voice[0]) + voice.Substring(1)} {title}.{ext}");
             try
             {
+                var responseContent = await httpResponse.Content.ReadAsStreamAsync();
+                var ext = MimeTypes.GetMimeTypeExtensions(httpResponse.Content.Headers.ContentType.ToString()).First();
+                var filename = CleanFileName($"{char.ToUpper(voice[0]) + voice.Substring(1)} {title}.{ext}");
                 await ctx.Channel.SendFileAsync(responseContent, filename);
             }
             catch

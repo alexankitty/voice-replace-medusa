@@ -1,0 +1,13 @@
+hello:
+  desc: "This is a basic hello command"
+  args:
+    - ""
+    - "@Someone"
+voices:
+  desc: "Gets the list of available voices from the replacer endpoint"
+voicereplaceryt:
+  desc: "Queries an endpoint that can take a youtube video and replace the vocals giving back an mp3."
+  args:
+    - "url"
+    - "voice"
+    - "pitch"

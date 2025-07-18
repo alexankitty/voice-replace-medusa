@@ -3,9 +3,8 @@ voices:
 voicereplaceryt:
   desc: "Queries an endpoint that can take a youtube video and replace the vocals giving back an mp3."
   args:
-    - "url"
-    - "voice"
-    - "pitch"
+    - "url voice"
+    - "url voice pitch"
 voicereplacerapi:
   desc: "Sets the API location for the voice replacer server."
   args:

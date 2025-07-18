@@ -54,6 +54,15 @@ public sealed class VoiceReplace : Snek
     [cmd]
     public async Task VoiceReplacerYt(AnyContext ctx, string url, string voice, string pitch = "0")
     {
+        try
+        {
+            var testurl = new Uri(url);
+        }
+        catch
+        {
+            await ctx.SendErrorAsync("Url is not valid.");
+            return;
+        }
         var typing = ctx.Channel.EnterTypingState();
         var httpResponse = await _httpClient.PostAsJsonAsync($"{_config.Api}/ytinfo", new InfoRequest(url));
         if (!httpResponse.IsSuccessStatusCode)

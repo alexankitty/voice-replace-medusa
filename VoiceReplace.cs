@@ -95,8 +95,9 @@ public sealed class VoiceReplace : Snek
             {
                 var responseContent = await httpResponse.Content.ReadAsStreamAsync();
                 var ext = MimeTypes.GetMimeTypeExtensions(httpResponse.Content.Headers.ContentType.ToString()).First();
-                var filename = CleanFileName($"{char.ToUpper(voice[0]) + voice.Substring(1)} {title}.{ext}");
+                var filename = CleanFileName($"{voiceinfo.DisplayName} {title}.{ext}");
                 await webhookSender.SendFileAsync(responseContent, filename);
+                await webhookSender.DisposeAsync();
                 await msgToGen.DeleteAsync();
             }
             catch

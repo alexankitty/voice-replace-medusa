@@ -1,0 +1,1 @@
+dotnet restore --source ../mikubotnew/src/Nadeko.Medusa/bin/Release/packed

@@ -18,10 +18,8 @@
 
   <ItemGroup>
     <!-- Base medusa package. You MUST reference this in order to have a working medusa -->
-    <PackageReference Include="Nadeko.Medusa" Version="5.*-*">
-      <PrivateAssets>all</PrivateAssets>
+    <PackageReference Include="Nadeko.Medusa" Version="9.*-*" PrivateAssets="All">
     </PackageReference>
-
     <!-- Note: If you want to use NadekoBot services etc... You will have to manually clone 
       the https://gitlab.com/kwoth/nadekobot repo locally and reference the NadekoBot.csproj because there is no NadekoBot package atm.
       It is strongly recommended that you checkout a specific tag which matches your version of nadeko,

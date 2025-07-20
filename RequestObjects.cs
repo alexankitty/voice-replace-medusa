@@ -33,3 +33,11 @@ public class InfoRequest
     [JsonPropertyName("url")]
     public string Url { get; set; }
 }
+
+public class VoiceInfo
+{
+    [JsonPropertyName("displayname")]
+    public string DisplayName { get; set; }
+    [JsonPropertyName("avatarurl")]
+    public string AvatarUrl { get; set; }
+}

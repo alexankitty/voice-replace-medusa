@@ -1,10 +1,8 @@
-﻿using System.Text;
-using NadekoBot.Medusa;
+﻿using NadekoBot.Medusa;
 using Newtonsoft.Json;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System.Net.Http.Json;
-using Discord;
 using System.Text.RegularExpressions;
 
 namespace VoiceReplaceMedusa;
@@ -65,17 +63,32 @@ public sealed class VoiceReplace : Snek
             await ctx.SendErrorAsync("Url is not valid.");
             return;
         }
-        var typing = ctx.Channel.EnterTypingState();
+        var voiceinforesponse = await _httpClient.GetAsync($"{_config.Api}/voiceinfo/{voice}");
+        if (!voiceinforesponse.IsSuccessStatusCode)
+        {
+            await ctx.SendErrorAsync("Voice not found");
+        }
+        var voiceinfo = JsonConvert.DeserializeObject<VoiceInfo>(await voiceinforesponse.Content.ReadAsStringAsync());
+        var voiceavatarurl = new Uri($"{_config.Api}{voiceinfo.AvatarUrl}");
+        var avatarResponse = await _httpClient.GetAsync(voiceavatarurl);
+        Stream avatar;
+        if (!avatarResponse.IsSuccessStatusCode)
+        {
+            avatar = null;
+        }
+        avatar = await avatarResponse.Content.ReadAsStreamAsync();
         var httpResponse = await _httpClient.PostAsJsonAsync($"{_config.Api}/ytinfo", new InfoRequest(url));
         if (!httpResponse.IsSuccessStatusCode)
         {
-            typing.Dispose();
+            await ctx.SendErrorAsync("Failed to replace vocals.");
             return;
         }
         var infoContent = await httpResponse.Content.ReadAsStringAsync();
         var info = JsonConvert.DeserializeObject<VideoInfo>(infoContent);
         string title = info.Title;
+        var msgToGen = await ctx.Channel.SendMessageAsync($"Requesting {voiceinfo.DisplayName} to cover {title}.");
         httpResponse = await _httpClient.PostAsJsonAsync($"{_config.Api}/replace_yt", new ReplaceYtRequest(url, voice, pitch));
+        var webhookSender = new WebhookSender(ctx.Channel, voiceinfo.DisplayName, avatar);
         if (httpResponse.IsSuccessStatusCode)
         {
             try
@@ -83,20 +96,21 @@ public sealed class VoiceReplace : Snek
                 var responseContent = await httpResponse.Content.ReadAsStreamAsync();
                 var ext = MimeTypes.GetMimeTypeExtensions(httpResponse.Content.Headers.ContentType.ToString()).First();
                 var filename = CleanFileName($"{char.ToUpper(voice[0]) + voice.Substring(1)} {title}.{ext}");
-                await ctx.Channel.SendFileAsync(responseContent, filename);
+                await webhookSender.SendFileAsync(responseContent, filename);
+                await msgToGen.DeleteAsync();
             }
             catch
             {
+                await msgToGen.DeleteAsync();
                 await ctx.SendErrorAsync($"Failed to upload result. File is most likely to large.");
-                typing.Dispose();
                 return;
             }
         }
         else
         {
+            await msgToGen.DeleteAsync();
             await ctx.SendErrorAsync("Failed to replace vocals.");
         }
-        typing.Dispose();
     }
 
     [cmd]
@@ -114,9 +128,10 @@ public sealed class VoiceReplace : Snek
     }
 
     public static string CleanFileName(string fileName)
-	{
+    {
         return Regex.Replace(fileName, "<|>|:|\"|\\/|\\|||\\?\\*", "");
-	}
+    }
+
 }
 
 public class MedusaConfig

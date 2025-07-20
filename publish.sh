@@ -1,0 +1,1 @@
+dotnet publish -o /mnt/kittycloud/discord/mikubotnew/output/data/medusae/voice-replace-medusa /p:DebugType=embedded --source ../mikubotnew/src/Nadeko.Medusa/bin/Release/packed voice-replace-medusa.sln
